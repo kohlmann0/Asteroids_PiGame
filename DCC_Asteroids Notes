@@ -2,8 +2,10 @@ DCC_Asteroids Notes:
 
 SDL and pygame work together as an excellent game enginer, almost all runtime is spent in SDL handling graphics and can take use of graphics hardware acceleration(if supported) this can change a game from 40 to over 200 FPS!
 
-Good pages to see:
 
+BLIT: This is a term you will see a lot, it basically means to copy graphics from one image to another. 
+
+Good pages to see:
 https://www.pygame.org/docs/tut/intro/intro.html
 https://www.pygame.org/docs/tut/ImportInit.html
 https://www.pygame.org/docs/tut/MoveIt.html
@@ -37,21 +39,21 @@ To update the visible display use pygame.display.flip() this function makes ever
 !@#$%^&*Pygame does have modules that support things like input handling for the keyboard, mouse, and joystick. Along with mixing audio and decode streaming music. with the Surfaces you can draw simple shapes, rotate, scale, etc. Even manipulate the piexls of an image in realtime as Numeric Python Arrays. MPEG video playback and CD support also. 
 
 PyGame Modules Overview:
--cdrom manage cdrom devices and audio playback
--cursors load cursor images, includes standard cursors
--display control the display window or screen
--draw draw simple shapes onto a Surface
--event manage events and the event queue
--font create and render Truetype fonts
--image save and load images
--joystick manage joystick devices
--key manage the keyboard
--mouse manage the mouse
--movie playback of mpeg movies
--sndarray manipulate sounds with Numeric
--surfarray manipulate images with Numeric
--time control timing
--transform scale, rotate, and flip images
+-cdrom: manage cdrom devices and audio playback
+-cursors: load cursor images, includes standard cursors
+-display: control the display window or screen
+-draw: draw simple shapes onto a Surface
+-event: manage events and the event queue
+-font: create and render Truetype fonts
+-image: save and load images
+-joystick: manage joystick devices
+-key: manage the keyboard
+-mouse: manage the mouse
+-movie: playback of mpeg movies
+-sndarray: manipulate sounds with Numeric
+-surfarray: manipulate images with Numeric
+-time: control timing
+-transform: scale, rotate, and flip images
 
 
 Initalize:
@@ -62,7 +64,7 @@ You must start with pygame.init() it attempts to initalize all modules in pygame
 **MODULES THAT ARE INITALIZED ALSO HAVE A QUIT FUNCTION THAT WILL CLEAN UP, BUT THESE DONT NESCESSAIRLY NEED TO BE CALLED AS PYGAME WILL CLEANLY QUIT ALL THE INITILIZED MODULES WHEN PYTHON FINISHES.
 
 
-MOVEMENT:
+MOVEMENT and Coordinate CHANGE:
 The way to change pixels in pygame is by calling the blit() function. It copies pixles from one image onto another(our game objects like the ship and asteroids, etc.)
 All that happens when you blit() is that the color of the pixels on the screen changes, none are added or removed, just modify the ones already on screen. Images you blit() to screen are also Surfaces in pygame but arent NEEDED nor connected to the display Surface. When they are blitted() you still have a copy of the original.
 	----Key note: WE DONT ACTUALLY MOVE ANYTHING AT ALL, WE BLIT() THE IMAGE IN A NEW POSITION BUT FIRST WE NEED TO "ERASE"
@@ -71,3 +73,47 @@ All that happens when you blit() is that the color of the pixels on the screen c
 The easiest way to keep track of movement(especially of multiple objects) is to keep a copy of the screen backround so when we "erase" we can redraw om his new position.
 We want to create a seperate list we will call out background
 
+Coordinates:
+when using blit() in pygame, positions are always passed as an (X,Y) coordinate! This represents the number of pixels to the right and the number of pixels down to place the image. The top left corner of a Surface is coord(0,0), a little right would be (10,0). Then down just as much is (10,10)
+
+Pygame has a convenient container for these coordinates and it is a Rect. It basically represents an rectangular area in these coordinates. it has a top left corner, and a size. Rect has a lot of handy methods which help you move and position them. Keep in mind a lot of functions in pygame expect/demand Rect arguments, and all of these functions can also accept a simple tuple of 4 elements (left, top, width, height). You arent ALWAYS required to use the RECT objects, but you really should. blit() function call also accepts a Rect as its positon arg, it just uses the top left corner of the Rect as its real position.
+
+Since we arent doing a tile-based game but want smooth scrooling(space flying and sheet) we shall change th3 background into a single image that covers the whole screen(black because space???) so that when we want to "erase" our objects before we radwar them we only need to blit() the section of the erased background onto the screen.
+By giving an optional third Rect argument to blit() we are telling blit to only use that section of the source image
+When finished drawing to the screen we use the pygame.display.update() function which will show everything we have drawn onto the screen.
+
+Smooth Movement:
+To make movement appear smothly and since we are doing a space shooter we need to do this, we only want to move it a couple pixels at a time, here is an example:
+
+>>> screen = create_screen()
+>>> player = load_player_image()
+>>> background = load_background_image()
+>>> screen.blit(background, (0, 0))       #draw the background
+>>> position = player.get_rect()
+>>> screen.blit(player, position)         #draw the player
+>>> pygame.display.update()               #and show it all
+>>> for x in range(100):                  #animate 100 frames
+...    screen.blit(background, position, position) #erase
+...    position = position.move(2, 0)     #move player
+...    screen.blit(player, position)      #draw new player
+...    pygame.display.update()            #and show it all
+...    pygame.time.delay(100)             #stop the program for 1/10 second
+
+This is all the code one needs to smoothly animate an object(spaceship and asteroids) across the screen. A bonus of doing the background this way is that the image for the player can have transparancy or cutout sections and it will still draw correctly over the background. The addition of the call to pygame.time.delay() at the end of the above loop slows down our program a bit otherwise it might run too fast and you wouldnt see it. 
+
+Functions, Variables and Examples:
+
+player = pygame.image.load("ship.bmp").convert()
+background = pygame.image.load("space.bmp").convert()
+asteroid = pygame.image.load("asteroid.bmp").convert()
+
+Above^^^ we are using the pygame.image modules load() function to load our images for our objects. Load just takes a filename and returns a new surface with the loaded image. Upon load we make a call to the Surface method convert(), this function returns a new Surface of the image, but now in the same pixel format as our display. As the images will be the same format at the screen, they will blit() extreemly quickly. Without converting blit() is slower since it has to convert as it goes not before. 
+
+Load() and convert() both return new Surfaces, this means were really creating three Surfaces on the lines above, and bython is smart enough to clean up the Surface we end up not using
+
+In pygame it is quite simple to create a new window for graphics using the create_screen() function call. This means that to create a 640x480 surface below and without passing any other arguments pygame will pick the best colordepth and pixel format for us:
+	screen = pygame.display.set_mode((640, 480))
+
+
+HANDLING INPUT:
+use a while 1 loop for this, we need to edd event handling to our program, all GUI programs use this Event Based design. The program gets things like keyboard presed our mouse moved from the computer. It responds based on the events. 
