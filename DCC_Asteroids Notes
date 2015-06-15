@@ -1,0 +1,73 @@
+DCC_Asteroids Notes:
+
+SDL and pygame work together as an excellent game enginer, almost all runtime is spent in SDL handling graphics and can take use of graphics hardware acceleration(if supported) this can change a game from 40 to over 200 FPS!
+
+Good pages to see:
+
+https://www.pygame.org/docs/tut/intro/intro.html
+https://www.pygame.org/docs/tut/ImportInit.html
+https://www.pygame.org/docs/tut/MoveIt.html
+
+__________________________________________________________________________________________
+These are the critical notes I thought were important, will add more as game expands gents.
+__________________________________________________________________________________________
+
+import sys 
+import pygame #imports the package and all modules
+pygame.init() #Confirmed that this line initalizes each of the pygame modules
+
+pygame.display.set_mode() is a function used to create a graphical window, but it just creates the window
+
+display.set_mode() is a function that creates a new surface object that represents the actual displayed graphics(id est out login screen, our asteroids, ships) all should be created by this function, any drawing on this surface will become visible on the monitor
+
+
+pygame.image.load() is the function we will use to load our images. Supports image formats through SDL_image lib. inclusive: JPEG, PNG, TGA, and GIF. this functions returns us a sufrace with object data from display.set_mode() Keeps all colorkey or alpha transparency from file. 
+
+After loading image above we use .get_rect() which is a convenient util. object type named Rect which represents a rectangular area(Know Area of Squares for this) 
+
+Now the program is initialized and ready to run if you applied these functions to the right objects.
+In an infinite While Loop we 1. check for user input, 2. move the object, 3. then draw the object. We check if a QUIT event has happened(if else for this biddy) and if so simply and gracefully exit program.
+
+Because of the way computers work and display images(like a movie) we have to erase the screen with a BLACK RGB color. If we didnt do this we would see a trail.
+
+To draw on the screen use surface.blit() this function copies pixel colors from one image to another. We pass a source Surface to copy from and a position to place the source onto the destination
+
+To update the visible display use pygame.display.flip() this function makes everything we have drawn on the screen surface visible, this buffering makes sure we only see completly drawn frames ons creen without it the use would see half the completed parts of the screen as it is being created!
+
+!@#$%^&*Pygame does have modules that support things like input handling for the keyboard, mouse, and joystick. Along with mixing audio and decode streaming music. with the Surfaces you can draw simple shapes, rotate, scale, etc. Even manipulate the piexls of an image in realtime as Numeric Python Arrays. MPEG video playback and CD support also. 
+
+PyGame Modules Overview:
+-cdrom manage cdrom devices and audio playback
+-cursors load cursor images, includes standard cursors
+-display control the display window or screen
+-draw draw simple shapes onto a Surface
+-event manage events and the event queue
+-font create and render Truetype fonts
+-image save and load images
+-joystick manage joystick devices
+-key manage the keyboard
+-mouse manage the mouse
+-movie playback of mpeg movies
+-sndarray manipulate sounds with Numeric
+-surfarray manipulate images with Numeric
+-time control timing
+-transform scale, rotate, and flip images
+
+
+Initalize:
+You must start with pygame.init() it attempts to initalize all modules in pygame for you, they dont all need to be initalized but this will automatically do it for ones that need to be. It can also be done by hand in the case of:     pygame.font.init() function call. 
+
+**However if there is an error with initializeation with pygame.init(), then it will silently fail. When handling modules like this ANY ERRORS WILL RAISE EXCEPTIONS. Any modules requiring initialization have a "get_init()" function which returns true if it has been initalized
+**IT IS SAFE TO CALL THE init() FUNCTION FOR ANY MODULE MORE THAN ONCE
+**MODULES THAT ARE INITALIZED ALSO HAVE A QUIT FUNCTION THAT WILL CLEAN UP, BUT THESE DONT NESCESSAIRLY NEED TO BE CALLED AS PYGAME WILL CLEANLY QUIT ALL THE INITILIZED MODULES WHEN PYTHON FINISHES.
+
+
+MOVEMENT:
+The way to change pixels in pygame is by calling the blit() function. It copies pixles from one image onto another(our game objects like the ship and asteroids, etc.)
+All that happens when you blit() is that the color of the pixels on the screen changes, none are added or removed, just modify the ones already on screen. Images you blit() to screen are also Surfaces in pygame but arent NEEDED nor connected to the display Surface. When they are blitted() you still have a copy of the original.
+	----Key note: WE DONT ACTUALLY MOVE ANYTHING AT ALL, WE BLIT() THE IMAGE IN A NEW POSITION BUT FIRST WE NEED TO "ERASE"
+	THE OLD ONE, OTHERWISE IT WILL BE VISIBLE ON TWO PLACES IN THE SCREEN, BY ERASING AND REDWAWING IN A NEW PLACE WE ACCHINE THE "ILLUSION OF MOVEMENT" its like how at full stride you cant tell if a horse has left the ground or not. 
+
+The easiest way to keep track of movement(especially of multiple objects) is to keep a copy of the screen backround so when we "erase" we can redraw om his new position.
+We want to create a seperate list we will call out background
+
