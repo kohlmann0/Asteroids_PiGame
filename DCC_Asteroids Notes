@@ -28,7 +28,7 @@ pygame.image.load() is the function we will use to load our images. Supports ima
 After loading image above we use .get_rect() which is a convenient util. object type named Rect which represents a rectangular area(Know Area of Squares for this) 
 
 Now the program is initialized and ready to run if you applied these functions to the right objects.
-In an infinite While Loop we 1. check for user input, 2. move the object, 3. then draw the object. We check if a QUIT event has happened(if else for this biddy) and if so simply and gracefully exit program.
+In an infinite While Loop, we 1. check for user input, 2. move the object, 3. then draw the object. We check if a QUIT event has happened(if else for this biddy) and if so simply and gracefully exit program.
 
 Because of the way computers work and display images(like a movie) we have to erase the screen with a BLACK RGB color. If we didnt do this we would see a trail.
 
