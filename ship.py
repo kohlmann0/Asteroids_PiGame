@@ -17,7 +17,8 @@ clock = pygame.time.Clock()
 gameOver = False
 
 #sets 10 asteroids to fall from the screen.
-asteroid_list = []
+asteroid_list = pygame.sprite.Group()
+all_sprite_list = pygame.sprite.Group()
 for i in range(10):
     x = random.randrange(0,800)
     y = random.randrange(0,800)
