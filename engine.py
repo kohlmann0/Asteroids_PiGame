@@ -15,13 +15,13 @@ import datetime
 import time
 import pygame
 import os
-import random
+from random import *
 import math
 pygame.init()
 
 # from ship import *              # Ryan
 # from AsteroidsFTW import *      # Rob
-# from display import *           # Matt
+from display_functions import *           # Matt
 
 def debug(message):
     DEBUG = True
@@ -37,7 +37,7 @@ class Ship:
     def __init__(self):
         self.x = 400
         self.y = 400
-        self.angle = random.randint(0,360)
+        self.angle = randint(0,360)
         self.speed = 1
         return
 
@@ -61,12 +61,19 @@ class Ship:
     def checkCollision(self, location, size):
         pass
         return
+
+    def get_position(self):
+        pos = (self.x, self.y)
+        return pos
+
+    def get_angle(self):
+        return self.angle
         
 class Asteroid:
     def __init__(self):
-        self.x = 400
-        self.y = 400
-        self.angle = random.randint(0,360)
+        self.x = 1
+        self.y = 1
+        self.angle = randint(0,360)
         self.speed = 1
         return
         
@@ -83,13 +90,13 @@ class Asteroid:
             self.y += 800
         return
         
-    def getLocation(self):
+    def get_location(self):
         return (self.x, self.y)
         
     def getSize(self):
         pass
         return
-
+'''
 def displayGameScreen(objectList, screen):
     backgroundimage = pygame.image.load("StarField.gif")
     background = pygame.transform.scale(backgroundimage,(width,height))
@@ -108,7 +115,7 @@ def displayGameScreen(objectList, screen):
     pygame.display.flip()
     
     return
-
+'''
 def displayStartupScreen(screen):
     pygame.display.set_caption('Asteroids For The Win!')
     selection = 1    
@@ -196,7 +203,7 @@ def main(objectList, screen, lives):
         # Process Collision Detect
         debug("STARTING COLLISION DETECT")
         for each in objectList[1:]:
-            Asteroid_Center_Location = each.getLocation()
+            Asteroid_Center_Location = each.get_location()
             Asteroid_Size = each.getSize()
             collisionDetected = ship.checkCollision(Asteroid_Center_Location, Asteroid_Size)
             if collisionDetected:
