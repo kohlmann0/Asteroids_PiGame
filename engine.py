@@ -19,7 +19,7 @@ from random import *
 import math
 pygame.init()
 
-# from ship import *              # Ryan
+from ship import *             # Ryan
 # from AsteroidsFTW import *      # Rob
 from display_functions import *           # Matt
 
@@ -33,51 +33,52 @@ def debug(message):
 
 ##### Debugging Section Stub-Out (IGNORE THIS, THIS IS JUST TO PREVENT ERRORS WHILE DEBUGGING)
 ##### WILL BE REPLACED WITH ACTUAL CLASSES
-class Ship:
+# class Ship:
+#     def __init__(self):
+#         self.x = 400
+#         self.y = 400
+#         self.angle = randint(0,360)
+#         self.speed = 1
+#         return
+
+#     def processUserInputs(self):
+#         pass
+#         return
+        
+#     def ProcessTimeIncrement(self):
+#         self.x += self.speed * math.cos(math.radians(self.angle))
+#         self.y -= self.speed * math.sin(math.radians(self.angle))
+#         if self.x > 800:
+#             self.x -= 800
+#         if self.x < 0:
+#             self.x += 800
+#         if self.y > 800:
+#             self.y -= 800
+#         if self.y < 0:
+#             self.y += 800
+#         return
+        
+#     def checkCollision(self, location, size):
+#         pass
+#         return
+
+#     def get_position(self):
+#         pos = (self.x, self.y)
+#         return pos
+
+#     def get_angle(self):
+#         return self.angle
+        
+class Asteroid(pygame.sprite.Sprite):
     def __init__(self):
-        self.x = 400
-        self.y = 400
-        self.angle = randint(0,360)
-        self.speed = 1
-        return
-
-    def processUserInputs(self):
-        pass
-        return
-        
-    def ProcessTimeIncrement(self):
-        self.x += self.speed * math.cos(math.radians(self.angle))
-        self.y -= self.speed * math.sin(math.radians(self.angle))
-        if self.x > 800:
-            self.x -= 800
-        if self.x < 0:
-            self.x += 800
-        if self.y > 800:
-            self.y -= 800
-        if self.y < 0:
-            self.y += 800
-        return
-        
-    def checkCollision(self, location, size):
-        pass
-        return
-
-    def get_position(self):
-        pos = (self.x, self.y)
-        return pos
-
-    def get_angle(self):
-        return self.angle
-        
-class Asteroid:
-    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
         self.x = 1
         self.y = 1
         self.angle = randint(0,360)
         self.speed = 1
         return
         
-    def ProcessTimeIncrement(self):
+    def ProcessTimeIncrement(self,size):
         self.x += self.speed * math.cos(math.radians(self.angle))
         self.y -= self.speed * math.sin(math.radians(self.angle))
         if self.x > 800:
@@ -96,6 +97,8 @@ class Asteroid:
     def getSize(self):
         pass
         return
+
+
 '''
 def displayGameScreen(objectList, screen):
     backgroundimage = pygame.image.load("StarField.gif")
@@ -182,34 +185,47 @@ def displayStartupScreen(screen):
 
 
 # Single Round of the main game loop    
-def main(objectList, screen, lives):
+def main(objectList, screen, lives,size):
     endOfRound = False
     clock = pygame.time.Clock()
     while not endOfRound:
+        ship = objectList[0]
+        for event in pygame.event.get():#user does something
+            if event.type == pygame.QUIT:
+                endOfRound = True
+            elif event.type == pygame.KEYDOWN:
+                ship.keydown(event)
+                #ship.keydown(event,objectList[0])
+            elif event.type == pygame.KEYUP:
+                ship.keyup(event)
+                #keyup(event,objectList[0])
         clock.tick(60) # Game will render at 60 frames per second
         timeStamp = time.clock()
         debug("TIME is: " + str(timeStamp))
         # Read User Inputs
         debug("")
-        ship = objectList[0]
-        ship.processUserInputs()
+        #ship = objectList[0]
+
+        #ship.processUserInputs()
 
         # Process Time Increment
         debug("STARTING PROCESS TIME INCREMENT")
         for each in objectList:
-            each.ProcessTimeIncrement()
+            each.ProcessTimeIncrement(size)
 
 
         # Process Collision Detect
         debug("STARTING COLLISION DETECT")
-        for each in objectList[1:]:
-            Asteroid_Center_Location = each.get_location()
-            Asteroid_Size = each.getSize()
-            collisionDetected = ship.checkCollision(Asteroid_Center_Location, Asteroid_Size)
-            if collisionDetected:
-                lives -= 1
+        asteroid_list = list(objectList[1:])
+        #for each in objectList[1:]:
+            #Asteroid_Center_Location = each.get_location()
+            #Asteroid_Size = each.getSize()
+            #for asteroid in asteroid_list:
+            #collisionDetected = ship.checkCollision(Asteroid_Center_Location, Asteroid_Size)
+            #if collisionDetected:
+                #lives -= 1
                 # Reset 
-                break
+                #break
 
         # Process Graphics
         debug("STARTING GRAPHICS ENGINE")
@@ -217,7 +233,7 @@ def main(objectList, screen, lives):
         if lives == 0:
             return True
     
-        
+    pygame.quit()   
     return False # Change this to a gameOver test (No more lives, not more, whatever)
 
 
@@ -248,7 +264,10 @@ if __name__ == "__main__":
             objectList = []
             
             # Create the ship object
-            ship = Ship()
+            initial_pos_ship = [size[0]/2,size[1]/2]
+            initial_vel = [0,0]
+            initial_angle = 0
+            ship = Ship(initial_pos_ship,initial_vel,initial_angle)
             objectList.append(ship)
             
             # Create the asteroids
@@ -258,8 +277,7 @@ if __name__ == "__main__":
                 objectList.append(asteroid)
             
             # Start the main game loop        
-            gameOver = main(objectList, screen, lives)
-            
+            gameOver = main(objectList, screen, lives,size)
     
     # Options Menu Selected
     if menuSelection == 2:
