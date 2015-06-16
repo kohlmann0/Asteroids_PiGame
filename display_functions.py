@@ -61,6 +61,12 @@ def displayGameScreen(objectList, gameScreen):
 		aLoc = a.get_location()
 		gameScreen.blit(aImg, (aLoc))
 
+	#QUIT OPERATION
+	for event in pygame.event.get():
+		if event.type == QUIT:
+			pygame.quit()
+			sys.exit()
+
 	#DISPLAY UPDATE
 	pygame.display.update()
 
