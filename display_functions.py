@@ -38,7 +38,7 @@ def rot_center(image, angle):
 
 
 def displayGameScreen(objectList, gameScreen):
-<<<<<<< HEAD
+
 	#SET BACKGROUND
 	bg = pygame.image.load("Graphics_Assets\space_background.bmp")
 	gameScreen.blit(bg, (0,0))
@@ -70,7 +70,7 @@ def displayGameScreen(objectList, gameScreen):
 
 	#DISPLAY UPDATE
 	pygame.display.update()
-=======
+
     #SET BACKGROUND
     bg = pygame.image.load("Graphics_Assets\space_background.bmp")
     gameScreen.blit(bg, (0,0))
@@ -104,7 +104,7 @@ def displayGameScreen(objectList, gameScreen):
 
     #DISPLAY UPDATE
     pygame.display.update()
->>>>>>> d7357f312e0aafe254c2eded664a6290200ad8b8
+
 
 
 '''
