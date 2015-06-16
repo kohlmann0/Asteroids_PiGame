@@ -18,25 +18,26 @@ game_over = False #conditional that determines if game is playing
 asteroid_list = [] #list where my astroid objects are stored
 screen = pygame.display.set_mode(size)#this creates the window with the size specified
 pygame.display.set_caption("Asteroids Errywhere")#sets the display to show the string
-background = pygame.image.load("SGI.gif").convert() #sets background
+background = pygame.image.load("StarField.gif").convert() #sets background
 #screen.blit(background, (0,0))
 #speed = (0,1)
 
 class Asteroid(pygame.sprite.Sprite):#two function class for astroids
 	def __init__(self): #constructs my astroids, and sets position and speed maybe add 
 		pygame.sprite.Sprite.__init__(self)# call the parent class(sprite) constructor
-		self.speed = random.randrange(0,10)
-		self.image = pygame.image.load("sgilogo2.gif").convert() #Hard coded astroid value sets the image
+		self.speed = random.randrange(0, 10)
+		self.image = pygame.image.load("Asteroid.gif").convert() #Hard coded astroid value sets the image
 		self.x_coord = random.randrange(0, width) #this line and the y below generate random start coordinates for each
 		self.y_coord = random.randrange(0, height) #astroid based on the window size
-		self.position = (self.x_coord, self.y_coord)
+		#self.position = (self.x_coord, self.y_coord)
+		self.position = self.image.get_rect().move(self.x_coord, self.y_coord)###trial
 
 	def get_location(self):
 		return self.position
 
 	def move(self):
 		self.position = self.position.move(0, self.speed)
-		if self.position.right > 800:
+		if self.position.right > 500:
 			self.position.left = 0
 
 
@@ -52,12 +53,12 @@ def spawn_astroids(): #this function spawns astroids and acts as main
 		for individual_asteroid in asteroid_list:
 			screen.blit(individual_asteroid.image, individual_asteroid.position)
 		for individual_asteroid in asteroid_list:
-			#individual_asteroid.move()
+			individual_asteroid.move()
 			screen.blit(individual_asteroid.image, individual_asteroid.position)
 
 		#pygame.display.flip()
 		pygame.display.update()
-		#pygame.time.delay(100)
+		pygame.time.delay(100)
 
 
 
