@@ -143,7 +143,7 @@ def displayStartupScreen(screen):
                 selection = 2
         
         # Setup Background
-        backgroundimage = pygame.image.load("StarField.gif")
+        backgroundimage = pygame.image.load("StarField_2.png")
         background = pygame.transform.scale(backgroundimage,(width,height))
         
         # Setup "ASTEROIDS" Title

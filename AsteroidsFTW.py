@@ -32,8 +32,9 @@ while 1:
 '''
 
 
-class Asteroid:#two function class for astroids
-	def __init__(self, image, height, speed): #constructs my astroids, and sets position and speed
+class Asteroid(pygame.sprite.Sprite):#two function class for astroids
+	def __init__(self, image, height, speed): #constructs my astroids, and sets position and speed maybe add 
+		pygame.sprite.Sprite.__init__(self)
 		self.speed = speed
 		self.image = image
 		self.position = image.get_rect().move(0, height)
