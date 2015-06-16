@@ -25,10 +25,10 @@ class Asteroid(pygame.sprite.Sprite):#two function class for astroids
 		pygame.sprite.Sprite.__init__(self)# call the parent class(sprite) constructor
 		self.speed = random.randrange(5, 25)
 		self.image = pygame.image.load("Asteroid.gif").convert() #Hard coded astroid value sets the image
-		self.x_coord = random.randrange(-height, width) - random.randrange(-height, width)#this line and the y below generate random start coordinates for each
-		self.y_coord = random.randrange(-width, height) + random.randrange(-width, height)#astroid based on the window size
+		self.x_coord = random.randrange(0, width)#this line and the y below generate random start coordinates for each
+		self.y_coord = random.randrange(0, height)#astroid based on the window size
 		#self.position = (self.x_coord, self.y_coord)
-		self.position = background.get_rect().move(self.x_coord, self.y_coord)###trial
+		self.position = self.image.get_rect().move(self.x_coord, self.y_coord)###trial
 
 	def get_location(self):
 		return self.position
@@ -37,16 +37,15 @@ class Asteroid(pygame.sprite.Sprite):#two function class for astroids
 		self.position = self.position.move(0, self.speed)
 		if self.position.right > 800:
 			self.position.left = 0
-			#return self.position.left
 		elif self.position.left > 800:
 			self.position.right = 0
-			#return self.position.right
 		elif self.position.top > 800:
 			self.position.bottom = 0
-			#return self.position.bottom
 		elif self.position.bottom > 800:
 			self.position.top = 0
-			#return self.position.top
+		#elif self.position.bottom > 800:
+		#	self.position = self.position.right and self.position.left
+
 
 
 def spawn_astroids(): #this function spawns astroids and acts as main
@@ -66,6 +65,7 @@ def spawn_astroids(): #this function spawns astroids and acts as main
 		for individual_asteroid in asteroid_list:
 			individual_asteroid.move()
 			screen.blit(individual_asteroid.image, individual_asteroid.position)
+
 		
 		pygame.display.update()#brings all the changes of the while loop into effect
 		pygame.time.delay(100)#waits a 1/10th of a second
