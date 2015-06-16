@@ -57,7 +57,7 @@ def displayGameScreen(objectList, gameScreen):
 	#SET ASTEROIDS
 	asteroids = objectList[1:]
 	for a in asteroids:
-		aImg = pygame.image.load("Graphics_Assets\meteor.png")
+		aImg = pygame.image.load("Graphics_Assets\meteor_retro_3.png")
 		aLoc = a.get_location()
 		gameScreen.blit(aImg, (aLoc))
 
