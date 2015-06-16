@@ -25,7 +25,7 @@ background = pygame.image.load("StarField.gif").convert() #sets background
 class Asteroid(pygame.sprite.Sprite):#two function class for astroids
 	def __init__(self): #constructs my astroids, and sets position and speed maybe add 
 		pygame.sprite.Sprite.__init__(self)# call the parent class(sprite) constructor
-		self.speed = random.randrange(0, 10)
+		self.speed = random.randrange(0, 25)
 		self.image = pygame.image.load("Asteroid.gif").convert() #Hard coded astroid value sets the image
 		self.x_coord = random.randrange(0, width) #this line and the y below generate random start coordinates for each
 		self.y_coord = random.randrange(0, height) #astroid based on the window size
@@ -37,8 +37,14 @@ class Asteroid(pygame.sprite.Sprite):#two function class for astroids
 
 	def move(self):
 		self.position = self.position.move(0, self.speed)
-		if self.position.right > 500:
+		if self.position.right > 800:
 			self.position.left = 0
+		elif self.position.left > 800:
+			self.position.right = 0
+		elif self.position.top > 800:
+			self.position.bottom = 0
+		elif self.position.bottom > 800:
+			self.position.top = 0
 
 
 def spawn_astroids(): #this function spawns astroids and acts as main
@@ -51,11 +57,12 @@ def spawn_astroids(): #this function spawns astroids and acts as main
 			if event.type == pygame.QUIT:
 				sys.exit()
 		for individual_asteroid in asteroid_list:
+			screen.fill(black)#this line clears the screen so all the astroids will appear and move in the for loop below
 			screen.blit(individual_asteroid.image, individual_asteroid.position)
 		for individual_asteroid in asteroid_list:
 			individual_asteroid.move()
 			screen.blit(individual_asteroid.image, individual_asteroid.position)
-
+		
 		#pygame.display.flip()
 		pygame.display.update()
 		pygame.time.delay(100)
