@@ -38,51 +38,51 @@ def rot_center(image, angle):
 
 
 def displayGameScreen(objectList, gameScreen):
-	#SET BACKGROUND
-	bg = pygame.image.load("Graphics_Assets\star_ground.bmp")
-	gameScreen.blit(bg, (0,0))
-	
-	#SET SHIP
-	ship = objectList[0]
-	shipImg = pygame.image.load("Graphics_Assets\ship_1.png")
-	shipLoc = ship.get_position()
-	shipAngle = ship.get_angle()
-	rotShip = rot_center(shipImg, shipAngle)
+    #SET BACKGROUND
+    bg = pygame.image.load("Graphics_Assets\star_ground.bmp")
+    gameScreen.blit(bg, (0,0))
+    
+    #SET SHIP
+    ship = objectList[0]
+    shipImg = pygame.image.load("Graphics_Assets\ship_1.png")
+    shipLoc = ship.get_position()
+    shipAngle = ship.get_angle()
+    rotShip = rot_center(shipImg, shipAngle)
 
-	shipImg.set_colorkey((0,0,0))
-	gameScreen.blit(rotShip, (shipLoc))
-	
-	#SET ASTEROIDS or BULLET
-	'''
-	for index, each in enumerate(objectList)
-		if isininstance(each, Asteroid):
-			aImg = pygame.image.load("Graphics_Assets\meteor_retro_3.png")
-			aLoc = a.get_location()
-			gameScreen.blit(aImg, (aLoc))
-		
-		elif isininstance(each, Bullet):
-			bImg = pygame.image.load("Graphics_Assets\##########")
-			bLoc = each.get_position()
-			bAngle = each.get_angle()
-			rotBullet = rot_center(bImg, (bLoc))
+    shipImg.set_colorkey((0,0,0))
+    gameScreen.blit(rotShip, (shipLoc))
+    
+    #SET ASTEROIDS or BULLET
+    '''
+    for index, each in enumerate(objectList)
+        if isininstance(each, Asteroid):
+            aImg = pygame.image.load("Graphics_Assets\meteor_retro_3.png")
+            aLoc = a.get_location()
+            gameScreen.blit(aImg, (aLoc))
+        
+        elif isininstance(each, Bullet):
+            bImg = pygame.image.load("Graphics_Assets\##########")
+            bLoc = each.get_position()
+            bAngle = each.get_angle()
+            rotBullet = rot_center(bImg, (bLoc))
 
-			bImg.set_colorkey((0,0,0))
-			gameScreen.blit(rotBullet, (bLoc))
-			pygame.display.update()
-	'''
-	asteroids = objectList[1:]
-	for a in asteroids:
-		aImg = pygame.image.load("Graphics_Assets\meteor_retro_3.png")
-		aLoc = a.get_location()
-		gameScreen.blit(aImg, (aLoc))
+            bImg.set_colorkey((0,0,0))
+            gameScreen.blit(rotBullet, (bLoc))
+            pygame.display.update()
+    '''
+    asteroids = objectList[1:]
+    for a in asteroids:
+        aImg = pygame.image.load("Graphics_Assets\meteor_retro_3.png")
+        aLoc = a.get_location()
+        gameScreen.blit(aImg, (aLoc))
 
-	for event in pygame.event.get():
-		if event.type == QUIT:
-			pygame.quit()
-			sys.exit()
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
 
-	#DISPLAY UPDATE
-	pygame.display.update()
+    #DISPLAY UPDATE
+    pygame.display.update()
 
 
     #COLLISION

@@ -271,7 +271,7 @@ if __name__ == "__main__":
             objectList.append(ship)
             
             # Create the asteroids
-            asteroidImage = pygame.image.load("sgilogo2.gif").convert() #set player image
+            #asteroidImage = pygame.image.load("sgilogo2.gif").convert() #set player image
             for i in range(0, numberOfAsteroids + 1):
                 asteroid = Asteroid()
                 objectList.append(asteroid)
