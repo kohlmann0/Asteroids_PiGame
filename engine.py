@@ -17,272 +17,177 @@ import pygame
 import os
 from random import *
 import math
+
+
+from ship import *              # Ryan
+from AsteroidClass import *     # Rob
+from bulletClass import *       # Michael
+from explosionClass import *    # Michael
+from display_functions import * # Matt
+from OptionsScreen import *     # Michael
+from PlayerUp import *          # Rob
+
 pygame.init()
 
-from ship import *             # Ryan
-# from AsteroidsFTW import *      # Rob
-from display_functions import *           # Matt
+
 
 def debug(message):
-    DEBUG = True
+    DEBUG = False
     if DEBUG:
         print("DEBUG: " + str(message))
-    return
-    
-   
+    return DEBUG
 
-##### Debugging Section Stub-Out (IGNORE THIS, THIS IS JUST TO PREVENT ERRORS WHILE DEBUGGING)
-##### WILL BE REPLACED WITH ACTUAL CLASSES
-# class Ship:
-#     def __init__(self):
-#         self.x = 400
-#         self.y = 400
-#         self.angle = randint(0,360)
-#         self.speed = 1
-#         return
-
-#     def processUserInputs(self):
-#         pass
-#         return
-        
-#     def ProcessTimeIncrement(self):
-#         self.x += self.speed * math.cos(math.radians(self.angle))
-#         self.y -= self.speed * math.sin(math.radians(self.angle))
-#         if self.x > 800:
-#             self.x -= 800
-#         if self.x < 0:
-#             self.x += 800
-#         if self.y > 800:
-#             self.y -= 800
-#         if self.y < 0:
-#             self.y += 800
-#         return
-        
-#     def checkCollision(self, location, size):
-#         pass
-#         return
-
-#     def get_position(self):
-#         pos = (self.x, self.y)
-#         return pos
-
-#     def get_angle(self):
-#         return self.angle
-        
-class Asteroid(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.x = 1
-        self.y = 1
-        self.angle = randint(0,360)
-        self.speed = 1
-        return
-        
-    def ProcessTimeIncrement(self,size):
-        self.x += self.speed * math.cos(math.radians(self.angle))
-        self.y -= self.speed * math.sin(math.radians(self.angle))
-        if self.x > 800:
-            self.x -= 800
-        if self.x < 0:
-            self.x += 800
-        if self.y > 800:
-            self.y -= 800
-        if self.y < 0:
-            self.y += 800
-        return
-        
-    def get_location(self):
-        return (self.x, self.y)
-        
-    def getSize(self):
-        pass
-        return
-
-
-'''
-def displayGameScreen(objectList, screen):
-    backgroundimage = pygame.image.load("StarField.gif")
-    background = pygame.transform.scale(backgroundimage,(width,height))
-    screen.blit(background, (0,0))
-    
-    ship = objectList[1]
-    shipImage = pygame.image.load("ship.png")
-    shipLocation = ship.getLocation()
-    screen.blit(shipImage, shipLocation)
-    
-    asteroidImage = pygame.image.load("Asteroid.gif")
-    for each in objectList[1:]:
-        asteroidLocation = each.getLocation()
-        screen.blit(asteroidImage,asteroidLocation)
-
-    pygame.display.flip()
-    
-    return
-'''
-def displayStartupScreen(screen):
-    pygame.display.set_caption('Asteroids For The Win!')
-    selection = 1    
-    while True:
-        # Process Menu Selection Inputs
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DOWN:
-                    selection += 1
-                if event.key == pygame.K_UP:
-                    selection -= 1
-                if event.key == pygame.K_RETURN:
-                    return selection
-                if event.key == pygame.K_ESCAPE:
-                    sys.exit()
-            
-            if selection > 2:
-                selection = 1
-            if selection < 1:
-                selection = 2
-        
-        # Setup Background
-        backgroundimage = pygame.image.load("StarField_2.png")
-        background = pygame.transform.scale(backgroundimage,(width,height))
-        
-        # Setup "ASTEROIDS" Title
-        font = pygame.font.Font(None, 100)
-        asteroidText = font.render("ASTEROIDS", 1, (255,255,255), (0,0,0))
-        asteroidTextPos = asteroidText.get_rect()
-        asteroidTextPos.centerx = background.get_rect().centerx
-        asteroidTextPos.centery = (background.get_rect().centery - 50)
-        
-        # Setup "START" Menu button
-        font = pygame.font.Font(None, 36)
-        if selection == 1: 
-            startText = font.render("START GAME", 1, (255,255,255), (100,100,100))
-        else:
-            startText = font.render("START GAME", 1, (255,255,255), (0,0,0))
-        startTextPos = startText.get_rect()
-        startTextPos.centerx = background.get_rect().centerx
-        startTextPos.centery = (background.get_rect().centery + 20)
-            
-        # Setup "OPTIONS" Menu button
-        if selection == 2: 
-            optionsText = font.render("OPTIONS", 1, (255,255,255), (100,100,100))
-        else:
-            optionsText = font.render("OPTIONS", 1, (255,255,255), (0,0,0))
-        optionsTextPos = optionsText.get_rect()
-        optionsTextPos.centerx = background.get_rect().centerx
-        optionsTextPos.centery = (background.get_rect().centery + 50) 
-        
-        # Blit Screen
-        screen.blit(background, (0,0))
-        screen.blit(asteroidText, asteroidTextPos)
-        screen.blit(startText, startTextPos)
-        screen.blit(optionsText, optionsTextPos)
-        pygame.display.flip()
-    
-    #raw_input("Press Enter to continue")
-    return screen
-
+#add background music
+pygame.mixer.music.load('Graphics_Assets/space1.ogg')
+pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
+pygame.mixer.music.play()
 
 
 # Single Round of the main game loop    
-def main(objectList, screen, lives,size):
+def main(ship, asteroidGroup, explosionGroup, screen, lives, size):
     endOfRound = False
     clock = pygame.time.Clock()
+    endOfGamePause = 0
+
+
     while not endOfRound:
-        ship = objectList[0]
-        for event in pygame.event.get():#user does something
-            if event.type == pygame.QUIT:
-                endOfRound = True
-            elif event.type == pygame.KEYDOWN:
-                ship.keydown(event)
-                #ship.keydown(event,objectList[0])
-            elif event.type == pygame.KEYUP:
-                ship.keyup(event)
-                #keyup(event,objectList[0])
-        clock.tick(60) # Game will render at 60 frames per second
-        timeStamp = time.clock()
-        debug("TIME is: " + str(timeStamp))
-        # Read User Inputs
-        debug("")
-        #ship = objectList[0]
+        # 60 Framse per second
+        if debug(""): os.system('cls')
+        #clock.tick(60) 
+    
+        # Process User Inputs
+        if ship.get_lives() > 0:
+            clock.tick(60) # Game will render at 60 frames per second
+            # Player is still alive, Pass inputs to Ship class
+            isShoot = False
+            for event in pygame.event.get():#user does something
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    isShoot = ship.keydown(event)
+                elif event.type == pygame.KEYUP:
+                    isShoot = ship.keyup(event)
+                elif event.type == pygame.constants.USEREVENT:
+            # This event is triggered when the song stops playing.
+            # Next, song then plays
+                    pygame.mixer.music.load('Graphics_Assets/fly.ogg')
+                    pygame.mixer.music.play()
+                if isShoot:
+                    if ship.get_bulletPowerUp():
+                        Bullet(ship.get_position(), ship.get_angle(), True)
+                    else:
+                        Bullet(ship.get_position(), ship.get_angle(), False)
 
-        #ship.processUserInputs()
-
+        else:
+            clock.tick(10) # Game will render at 10 frames per second during death sequence
+            debug("END OF GAME DAMNIT!")
+            ship_thrust_sound.stop()
+            ship_missile_sound.stop()
+            endOfGamePause += 1 
+            for event in pygame.event.get():#user does something
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if endOfGamePause > 20:
+                        return True
+            
+        
+     
         # Process Time Increment
         debug("STARTING PROCESS TIME INCREMENT")
-        for each in objectList:
-            each.ProcessTimeIncrement(size)
+        #for each in objectGroup, update time increment:
+        ship.update(size)
+        for each in asteroidGroup:
+            each.update(size)
+            debug(("Ast" +str(each.get_location())))
+        for each in bulletGroup:
+            each.update(size)
+            debug(("Bul" + str(each.get_location())))
+        for each in explosionGroup:
+            each.update(size)
+            debug(("Exp" + str(each.get_location())))# + str(each.get_counter()))))
+            if each.get_counter() <= 0:
+                explosionGroup.remove(each)
+        for each in playerUpGroup:
+            each.update(size)
 
-
+            
+           
         # Process Collision Detect
         debug("STARTING COLLISION DETECT")
-        asteroid_list = list(objectList[1:])
-        #for each in objectList[1:]:
-            #Asteroid_Center_Location = each.get_location()
-            #Asteroid_Size = each.getSize()
-            #for asteroid in asteroid_list:
-            #collisionDetected = ship.checkCollision(Asteroid_Center_Location, Asteroid_Size)
-            #if collisionDetected:
-                #lives -= 1
-                # Reset 
-                #break
+        ###### Add Collision detect here.
 
         # Process Graphics
         debug("STARTING GRAPHICS ENGINE")
-        displayGameScreen(objectList, screen)
-        if lives == 0:
-            return True
-    
-    pygame.quit()   
+        displayGameScreen(ship, asteroidGroup, bulletGroup, explosionGroup, playerUpGroup, screen, size)
+
+        if len(asteroidGroup) == 0:
+            endOfRound = True
+            debug("Next Round")
+            return False
+
     return False # Change this to a gameOver test (No more lives, not more, whatever)
-
-
-
 
 
 # Game Starting point
 if __name__ == "__main__":
+    # Create Sprite Groups
+    shipGroup = pygame.sprite.Group()
+    Ship.groups = shipGroup
+    bulletGroup = pygame.sprite.Group()
+    Bullet.groups = bulletGroup
+    asteroidGroup = pygame.sprite.Group()
+    Asteroid.groups = asteroidGroup
+    explosionGroup = pygame.sprite.Group()
+    Explosion.groups = explosionGroup
+    playerUpGroup = pygame.sprite.Group()
+    Player_up.groups = playerUpGroup
+    
+    
+    #Default Options
+    options = ["ACE"]
+    
     # Clear Console Screen
     os.system("cls")
     
-    # Set Screen parameters
-    size = width, height = 800, 800
-    screen = pygame.display.set_mode(size)
-    
-    # Display Startup Screen, and return menu selection (Start Game = 1, Options = 2)
-    menuSelection = displayStartupScreen(screen)
-    
-    # Start Game Menu Option Selected
-    if menuSelection == 1:
-        lives = 3
-        gameOver = False
-        while not gameOver:
-            # Hard coded number of asteroids. May change later depending on difficulty/level/rounds.
-            numberOfAsteroids = 20
-        
-            # Initialize our Object list
-            objectList = []
-            
+    while True:
+        # Display Startup Screen, and return menu selection (Start Game = 1, Options = 2)
+        menuSelection = displayStartupScreen()
+        print menuSelection
+        # Start Game Menu Option Selected
+        if menuSelection == 1:
+            lives = 3
+            gameOver = False
+            numberOfAsteroids = 0
+            asteroidGroup.empty()
             # Create the ship object
+            size = setScreenSize(800, 800) #redefined size variable as call of setScreenSize function
             initial_pos_ship = [size[0]/2,size[1]/2]
             initial_vel = [0,0]
             initial_angle = 0
             ship = Ship(initial_pos_ship,initial_vel,initial_angle)
-            objectList.append(ship)
+            ship.set_name(options[0])
             
-            # Create the asteroids
-            #asteroidImage = pygame.image.load("sgilogo2.gif").convert() #set player image
-            for i in range(0, numberOfAsteroids + 1):
-                asteroid = Asteroid()
-                objectList.append(asteroid)
-            
-            # Start the main game loop        
-            gameOver = main(objectList, screen, lives,size)
-    
-    # Options Menu Selected
-    if menuSelection == 2:
-        pass
-     
+            while not gameOver:
+                # Hard coded number of asteroids. May change later depending on difficulty/level/rounds.
+                numberOfAsteroids += 2
+                
+                # Create the asteroids
+                #asteroidImage = pygame.image.load("sgilogo2.gif").convert() #set player image
+                for i in range(0, numberOfAsteroids):
+                    Asteroid() # Creates an Asteroid Object. Automatically dumps it into the asteroid list.
+
+
+                # Start the main game loop      
+                screen = createScreen(size)
+                gameOver = main(ship, asteroidGroup, explosionGroup, screen, lives,size)
+        
+        # Options Menu Selected
+        if menuSelection == 2:
+            options = displayOptionsScreen(options)
+         
         
         
         

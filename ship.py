@@ -2,49 +2,21 @@ import pygame
 import random
 import math
 
-
-#intializes pygame
-#pygame.init()
-
-
+#constant colors to use for screen display
 BLACK = (0,0,0)
 WHITE = (255,255,255)
-SIZE = (800,800)
-#screen = pygame.display.set_mode(SIZE)
-#pygame.display.set_caption("Asteroids")
-#initializes clock and gameOver state
-#clock = pygame.time.Clock()
-#gameOver = False
+#SIZE = (800,800)
 
-# class Asteroid(pygame.sprite.Sprite):
-#     def __init__(self,position,image,image_info):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.x = position[0]
-#         self.y = position[1]
-#         self.image = pygame.image.load(image).convert()
-#         self.image_center = image_info[1]
-#         self.image_size = image_info[0]
-#         self.rect = self.image.get_rect()
-#         self.rect.x = self.x
-#         self.rect.y = self.y
+#initialize pygame to use sounds for ship class
+pygame.init()
+ship_thrust_sound = pygame.mixer.Sound("Graphics_Assets\go_thrust.ogg")
+ship_missile_sound = pygame.mixer.Sound("Graphics_Assets\missile.wav")
 
-#     def update(self):
-#         #if self.y > SIZE[0]/2:
-#         self.y -= .25
-#         self.x = random.randrange(0,400)
-
-#     def draw(self):
-#         self.image.set_colorkey(BLACK)
-#         screen.blit(self.image,[self.x,self.y])
-
-
-#sets 10 asteroids to fall from the screen.
-
-
-#used for calculating forward direction based on angle provided
+#used for calculating forward direction based on angle(in radians) provided
 def angle_to_vector(ang):
     return [math.cos(ang), -math.sin(ang)]
  
+#uses pythagorean theorem to calculate differences in distance between two points.
 def dist(p,q):
     return math.sqrt((p[0]-q[0])**2+(p[1]-q[1])**2)
  
@@ -60,71 +32,166 @@ def rot_center(image, angle):
     return rot_image
  
 # Ship class - child class of pygame sprite class
-# currently image is name of file
+# currently image here is not used
+# initialize variables used for ship on creation.
 class Ship(pygame.sprite.Sprite):
     def __init__(self, pos, vel, angle):
-        pygame.sprite.Sprite.__init__(self)#
+        pygame.sprite.Sprite.__init__(self,self.groups)#groups used in case multiple ships are added
+        self.name = "Player"
         self.pos = [pos[0],pos[1]]
         self.vel = [vel[0],vel[1]]
         self.angle = angle
         self.thrust = False
         self.angle_vel = 0
-        self.image = pygame.image.load("Graphics_Assets\ship_1.png")
-        #self.image_center = image_info[1]
-        #self.image_size = image_info[0]
+        self.image = pygame.image.load("Graphics_Assets\ship_1.png")#not used, just in case sprite groups are used
         self.rect = self.image.get_rect()
         #x,y coordinates used for determing what the forward direction is
         self.forward = [0,0]
+        #radius used for collision detection
+        self.radius = 22.5
+        self.score = 0
+        self.lives = 3
+        #invincible used for initial spawn
+        self.invincible = False
+        #counter used to know how long ship is invincible
+        self.time_counter = 0
+        self.shield_counter = 0
+        self.shield = False
+        #counter used to knof how long the ship is in bullet powerup
+        self.bulletPowerup = False
+        self.bullet_counter = 0
+        
+        self.score_recorded = False
+        
     
     def get_position(self):
         return (self.pos[0],self.pos[1])
 
     def get_angle(self):
         return self.angle
-    #sets thrust to true if up arrow is pressed.
+
+    #sets thrust to true if up arrow is pressed and plays sound.
     def set_thrust(self, thrust):
         self.thrust = thrust
- 
+        if self.thrust == True:
+            ship_thrust_sound.play()
+        else:
+            ship_thrust_sound.stop()
+
+    #returns true for bullet creation and plays sound.
+    def shoot(self):
+        ship_missile_sound.set_volume(.5)
+        ship_missile_sound.play()
+        return True
+
+    #draw not used. Here just in case display function wanted to reference this.
     #color value is used to set the background color of the image to black so the background image is transparent.
     def draw(self,screen):
         self.image.set_colorkey(BLACK)
         screen.blit(rot_center(self.image, self.angle),self.pos)
  
-    def ProcessTimeIncrement(self,size):
+    #on screen refresh, ship position is updated.
+    def update(self,size):
         #added a friction element so ship will stop moving if key is not pressed.
-        acc = 0.5
-        fric = acc / 20
+        #larger acceleration, faster the ship will move
+        acc = 0.2
+        fric = acc / 18
         
+        #ship rotation angle for forward direction
         self.angle += self.angle_vel
- 
+        
+        #calculates direction ship should be facing
         self.forward = angle_to_vector(math.radians(self.angle))
  
+        #accelerates ship in the forward direction
         if self.thrust:
             self.vel[0] += self.forward[0] * acc
             self.vel[1] += self.forward[1] * acc
  
+        #applies friction to velocity of ship to slow down ship when thrust isn't applied.
         self.vel[0] *= (1 - fric)
         self.vel[1] *= (1 - fric)
  
-        # update position, right now my screen dimensions are 
+        # update positions for each update. self.rect.x & y used in case sprite collision detection is used.
         self.pos[0] = (self.pos[0] + self.vel[0]) % (size[0])
         self.pos[1] = (self.pos[1] + self.vel[1]) % (size[1])
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
 
+        #counter value decremented and when it hits zero invincible is set to False.
+        if self.time_counter > 0:
+            self.time_counter -= 1
+        else:
+            self.invincible = False
+
+        if self.shield_counter > 0:
+            self.shield_counter -= 1
+        else:
+            self.shield = False
+
+        # counter value decrement for bullet powerup
+        if self.bullet_counter > 0:
+            self.bullet_counter -= 1
+        else:
+            self.bulletPowerup = False
+            
+            
+            
     def set_angle_vel(self, vel):
         self.angle_vel = vel
 
-    def processUserInputs(self,event):
-        self.keydown(event)
-        self.keyup(event)
+    #used for collision detection
+    def get_radius(self):
+        return self.radius
 
+    def get_score(self):
+        return self.score
+
+    def get_lives(self):
+        return self.lives
+
+    # removes life and sets invincible to True. Sets counter to 300.
+    def death(self):
+        self.lives -= 1
+        self.invincible = True
+        if self.lives <= 0:
+            self.lives = 0
+            return True
+        else:
+            self.time_counter = 300
+            return False
+
+    def toggle_invincible(self):
+        if self.invincible == True:
+            self.invincible = False
+        else:
+            self.invincible = True
+
+    def get_invincible(self):
+        return self.invincible
+
+    def activate_shield(self):
+        self.shield = True
+        self.shield_counter = 600
+        self.invincible = True
+        self.time_counter = 600
+
+    def deactivate_shield(self):
+        self.shield = False
+        self.shield_counter = 0
+
+    def get_shield(self):
+        return self.shield
+
+    #not used now, can be used in future version.
     def checkCollision(self,asteroid_center, asteroid_location):
         pass
 
     def keydown(self,event):
 #     ang_vel is how fast the ship will rotate
         ang_vel = 4.5
+        if event.key == pygame.K_ESCAPE:
+            pygame.quit()
         if event.key == pygame.K_LEFT:
             self.set_angle_vel(ang_vel)
         if event.key == pygame.K_RIGHT:
@@ -132,7 +199,7 @@ class Ship(pygame.sprite.Sprite):
         if event.key == pygame.K_UP:
             self.set_thrust(True)
         if event.key == pygame.K_SPACE:
-            self.shoot()
+            return self.shoot()
 
     def keyup(self,event):
         if event.key in (pygame.K_LEFT,pygame.K_RIGHT):
@@ -140,83 +207,33 @@ class Ship(pygame.sprite.Sprite):
         if event.key == pygame.K_UP:
             self.set_thrust(False)
 
- 
+    def update_score(self):
+        self.score += 100
 
-#hardcoded ship values. 40 x 40 is image size, 20 is image center
-# ship_info = ([40, 40], 20)
-# ship_image = 'ship.png'
+    def get_score(self):
+        return self.score
 
-# #ship starts in center of screen with initial velocity of [0,0]
-# #ship starts with initial angle of 0
+    def get_thrust(self):
+        return self.thrust
 
+    def get_score_recorded(self):
+        return self.score_recorded
 
-# def keydown(event,ship_object):
-#     #ang_vel is how fast the ship will rotate
-#     ang_vel = 4.5
-#     raw_input("Hello")
-#     if event.key == pygame.K_LEFT:
-#         ship_object.set_angle_vel(ang_vel)
-#         print "Left"
-#     if event.key == pygame.K_RIGHT:
-#         ship_object.set_angle_vel(-ang_vel)
-#     if event.key == pygame.K_UP:
-#         ship_object.set_thrust(True)
-#         print "Up"
-#     if event.key == pygame.K_SPACE:
-#         ship_object.shoot()
-            
- 
-# #keyup handler
-# def keyup(event,ship_object):
- 
-#     if event.key in (pygame.K_LEFT,pygame.K_RIGHT):
-#         ship_object.set_angle_vel(0)
-#     if event.key == pygame.K_UP:
-#         ship_object.set_thrust(False)
+    def set_score_recorded(self,value):
+        self.score_recorded = value
 
+    def set_name(self,name):
+        self.name = name
 
+    def get_name(self):
+        return self.name
+        
+    def add_life(self):
+        self.lives += 1
 
-# #asteroid_info = ([40, 40], 20)
-# #asteroid_image = 'asteroid.png'
-# #asteroid_list = []
-# #ship = Ship([SIZE[0]/2, SIZE[1]/2], [0,0], 0, ship_image, ship_info)
-
-
-# # for i in range(50):
-# #     x = random.randrange(0,800)
-# #     y = random.randrange(0,800)
-# #     position_asteroid = [x,y]
-# #     print position_asteroid
-# #     i = Asteroid(position_asteroid,asteroid_image, asteroid_info)
-# #     asteroid_list.append(i)
-
-
-# while gameOver == False:
-#     for event in pygame.event.get():#user does something
-#         #if user clicked close
-#         if event.type == pygame.QUIT:
-#             gameOver = True
-#         elif event.type == pygame.KEYDOWN:
-#             keydown(event)
-#         elif event.type == pygame.KEYUP:
-#             keyup(event)
-    #screen.fill(BLACK)#clears the screen and sets the screen background
-    #needs to be done before any drawing command is issued.
-    #asteroid_list.update()
-#     ship.update(SIZE)
-#     for asteroid in asteroid_list:
-
-#         if pygame.sprite.collide_rect(ship,asteroid):
-#             print "Collide",ship.rect,asteroid.rect
-#             asteroid_list.remove(asteroid)
-#     ship.draw(screen)
-#     for asteroid in asteroid_list:
-#         asteroid.draw()
-#     #asteroid_list.draw(screen)
-#     #for asteroid in asteroid_hit_list:
-#         #asteroid.draw()
-
-#     pygame.display.flip()
-#     clock.tick(60)
-
-# pygame.quit()
+    def activate_bulletPowerUp(self):
+        self.bulletPowerup = True
+        self.bullet_counter = 600
+        
+    def get_bulletPowerUp(self):
+        return self.bulletPowerup
